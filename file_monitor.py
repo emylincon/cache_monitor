@@ -45,22 +45,27 @@ class Cache:
 class CacheDir:
     def __init__(self, path):
         self.path = path
-        self.cur_list = set((x for x in Path(self.path) if x.is_file()))
+
+        self.cur_list = set(self.get_files())
         while stop == 0:
             self.check_dir()
 
     def check_dir(self):
-        dir_list = set((x for x in Path(self.path) if x.is_file()))
+        dir_list = set(self.get_files())
         diff = dir_list - self.cur_list
         if len(diff) > 0:
-            self.cur_list = set((x for x in Path(self.path) if x.is_file()))
+            self.cur_list = set(set(self.get_files()))
             self.initialize(diff)
 
     def initialize(self, cache_list):
         for cache_id in cache_list:
-            obj_track[cache_id] = Thread(target=Cache, args=(cache_id, self.path))
+            obj_track[cache_id] = Thread(target=Cache, args=(cache_id, self.path,))
             obj_track[cache_id].daemon = True
             obj_track[cache_id].start()
+
+    def get_files(self):
+        s = os.listdir(self.path)
+        return [i for i in s if 'index' not in i]
 
 
 if __name__ == '__main__':
@@ -68,7 +73,7 @@ if __name__ == '__main__':
         print('Running. . .')
         ds = [d1, d2, d3]
         for d in ds:
-            obj_track[d] = Thread(target=CacheDir, args=(d))
+            obj_track[d] = Thread(target=CacheDir, args=(d,))
             obj_track[d].daemon = True
             obj_track[d].start()
         store_copy = store[:]
