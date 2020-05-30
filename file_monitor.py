@@ -10,6 +10,7 @@ obj_track = {}    # all objs are saved here   1:obj
 d1 = r'C:\Users\emyli\AppData\Local\Google\Chrome\User Data\Default\Cache'
 d2 = r'C:\Users\emyli\AppData\Local\Google\Chrome\User Data\Default\Code Cache\js'
 d3 = r'C:\Users\emyli\AppData\Local\Google\Chrome\User Data\Default\Code Cache\wasm'
+d4 = r'C:\Users\emyli\AppData\Local\Mozilla\Firefox\Profiles\4hqupym3.default\cache2\entries'
 stop = 0
 
 
@@ -25,7 +26,7 @@ class Cache:
         self.check_path()
 
     def add_seq(self):
-        store.append([self.cache_id, self.mod_time])
+        store.append([self.cache_id, str(self.mod_time)])
 
     def check_path(self):
         while True:
@@ -68,24 +69,33 @@ class CacheDir:
         return [i for i in s if 'index' not in i]
 
 
+def save_to_csv():
+    file = open('cache_data.csv', 'w', encoding='utf-8')
+    file.write('Key,Time\n')
+    for line in store:
+        file.write(','.join(line) + '\n')
+    file.close()
+
+
 if __name__ == '__main__':
     try:
         print('Running. . .')
-        ds = [d1, d2, d3]
+        ds = [d1, d2, d3, d4]
         for d in ds:
             obj_track[d] = Thread(target=CacheDir, args=(d,))
             obj_track[d].daemon = True
             obj_track[d].start()
         store_copy = store[:]
         time_now = datetime.datetime.now()
+        t = 1
         while True:       # Every 5 mins save a copy of the store
             if ((datetime.datetime.now() - time_now) > datetime.timedelta(minutes=5)) and (store_copy != store):
-                print('saving...')
-                df = pd.DataFrame(store, columns=['Key', 'Time'])
-                df.to_csv('cache_data.csv')
+                print(f'saving {t}')
+                t += 1
+                save_to_csv()
                 store_copy = store[:]
+                time_now = datetime.datetime.now()
     except KeyboardInterrupt:
         print('Terminating...')
         stop = 1
-        df = pd.DataFrame(store, columns=['Key', 'Time'])
-        df.to_csv('cache_data.csv')
+        save_to_csv()
