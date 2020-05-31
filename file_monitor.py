@@ -1,8 +1,7 @@
 import os
 import datetime
-import pandas as pd
 from threading import Thread
-from pathlib import *
+
 
 store = []
 replaced = []     # obj id to be deleted
@@ -11,6 +10,7 @@ d1 = r'C:\Users\emyli\AppData\Local\Google\Chrome\User Data\Default\Cache'
 d2 = r'C:\Users\emyli\AppData\Local\Google\Chrome\User Data\Default\Code Cache\js'
 d3 = r'C:\Users\emyli\AppData\Local\Google\Chrome\User Data\Default\Code Cache\wasm'
 d4 = r'C:\Users\emyli\AppData\Local\Mozilla\Firefox\Profiles\4hqupym3.default\cache2\entries'
+d5 = r'C:\Users\emyli\AppData\Local\Microsoft\Windows\INetCache'
 stop = 0
 
 
@@ -40,7 +40,7 @@ class Cache:
                 break
 
     def __del__(self):
-        print(f'{self.cache_id} removed')
+        print(f'{self.cache_id} Deleted')
 
 
 class CacheDir:
@@ -70,8 +70,7 @@ class CacheDir:
 
 
 def save_to_csv():
-    file = open('cache_data.csv', 'w', encoding='utf-8')
-    file.write('Key,Time\n')
+    file = open('cache_data.csv', 'a', encoding='utf-8')
     for line in store:
         file.write(','.join(line) + '\n')
     file.close()
@@ -80,20 +79,24 @@ def save_to_csv():
 if __name__ == '__main__':
     try:
         print('Running. . .')
-        ds = [d1, d2, d3, d4]
+        if not os.path.exists('cache_data.csv'):
+            file1 = open('cache_data.csv', 'w', encoding='utf-8')
+            file1.write('Key,Time\n')
+            file1.close()
+
+        ds = [d1, d2, d3, d4, d5]
         for d in ds:
             obj_track[d] = Thread(target=CacheDir, args=(d,))
             obj_track[d].daemon = True
             obj_track[d].start()
-        store_copy = store[:]
         time_now = datetime.datetime.now()
         t = 1
         while True:       # Every 5 mins save a copy of the store
-            if ((datetime.datetime.now() - time_now) > datetime.timedelta(minutes=5)) and (store_copy != store):
-                print(f'saving {t}')
+            if ((datetime.datetime.now() - time_now) > datetime.timedelta(minutes=5)) and (len(store) != 0):
+                print(f'Saving {t}')
                 t += 1
                 save_to_csv()
-                store_copy = store[:]
+                store = []
                 time_now = datetime.datetime.now()
     except KeyboardInterrupt:
         print('Terminating...')
