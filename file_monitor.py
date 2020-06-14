@@ -11,6 +11,7 @@ d2 = r'C:\Users\emyli\AppData\Local\Google\Chrome\User Data\Default\Code Cache\j
 d3 = r'C:\Users\emyli\AppData\Local\Google\Chrome\User Data\Default\Code Cache\wasm'
 d4 = r'C:\Users\emyli\AppData\Local\Mozilla\Firefox\Profiles\4hqupym3.default\cache2\entries'
 d5 = r'C:\Users\emyli\AppData\Local\Microsoft\Windows\INetCache'
+d6 = r'C:\Users\emyli\AppData\Local\Microsoft\Windows\INetCache\Content.Outlook\7OQ81RH8'
 stop = 0
 
 
@@ -84,7 +85,7 @@ if __name__ == '__main__':
             file1.write('Key,Time\n')
             file1.close()
 
-        ds = [d1, d2, d3, d4, d5]
+        ds = [d1, d2, d3, d4, d5, d6]
         for d in ds:
             obj_track[d] = Thread(target=CacheDir, args=(d,))
             obj_track[d].daemon = True
